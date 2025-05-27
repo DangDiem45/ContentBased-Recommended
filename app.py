@@ -15,6 +15,7 @@ import jwt
 from functools import wraps
 
 # Import các hàm từ module MySQL
+from models import TfidfVectorizerManual, cosine_similarity_manual
 from mysql_integration import (
     add_like_movie, create_connection, get_booked_seats, get_like_movies, get_showtimes, get_user_bookings, save_booking, save_showtime, save_user, get_user_by_firebase_uid, add_to_watchlist, get_watchlist, save_user_preferences, get_user_preferences
 )
@@ -28,10 +29,7 @@ tmdb_movie = Movie()
 # Đọc dữ liệu phim
 df2 = pd.read_csv("Main_data.csv")
 
-# Đọc các model đã train
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
-vectorizer = pkl.load(open('vectorizerer.pkl', 'rb'))
+vectorizer = pkl.load(open('vectorizer.pkl', 'rb'))
 clt = pkl.load(open('nlp_model.pkl', 'rb'))
 
 # URL cho các API call
@@ -166,9 +164,9 @@ def get_recommendations(title):
     if flag==0:
         df2 = pd.concat([df2, myseries.to_frame().T], ignore_index=True)
     df2=df2.replace(np.nan,'')
-    tfidf = TfidfVectorizer(stop_words='english')
+    tfidf = TfidfVectorizerManual(stop_words='english')
     count_matrix = tfidf.fit_transform(df2['comb'])
-    cosine_sim = cosine_similarity(count_matrix, count_matrix)
+    cosine_sim = cosine_similarity_manual(count_matrix, count_matrix)
     indices = pd.Series(df2.index, index=df2['title_x'])
     idx=indices[title]
     sim_scores = list(enumerate(cosine_sim[idx]))
