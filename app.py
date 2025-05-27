@@ -10,7 +10,7 @@ import random
 import bs4
 import re
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone  # Thêm timezone vào import
 import jwt
 from functools import wraps
 
@@ -250,7 +250,7 @@ def register():
         token = jwt.encode({
             'firebase_uid': firebase_uid,
             'email': email,
-            'exp': datetime.utcnow() + timedelta(days=30)
+            'exp': datetime.now(timezone.utc) + timedelta(days=30)  # Thay utcnow() bằng now(timezone.utc)
         }, app.config['SECRET_KEY'], algorithm="HS256")
         
         return jsonify({
@@ -285,7 +285,7 @@ def login():
     token = jwt.encode({
         'firebase_uid': firebase_uid,
         'email': email,
-        'exp': datetime.utcnow() + timedelta(days=30)
+        'exp': datetime.now(timezone.utc) + timedelta(days=30)  # Thay utcnow() bằng now(timezone.utc)
     }, app.config['SECRET_KEY'], algorithm="HS256")
     
     return jsonify({
@@ -788,5 +788,6 @@ def get_user_bookings_route(current_user):
     except Exception as e:
         print(f"Error getting user bookings: {e}")
         return jsonify({'message': f'Failed to get bookings: {str(e)}'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

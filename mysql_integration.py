@@ -13,7 +13,7 @@ def create_connection():
     try:
         connection = mysql.connector.connect(
             host='localhost',
-            database='movie_app_db',
+            database='movie_film',
             user='root',
             password=''
         )
@@ -223,33 +223,34 @@ def get_watchlist(user_id):
                 cursor.close()
                 connection.close()
 
-# Thêm phim đã xem
-def add_like_movie(user_id, movie_id, movie_title, poster_path=''):
+def add_like_movie(user_id, movie_id, movie_title, poster_path):
     connection = create_connection()
     if connection:
         try:
             cursor = connection.cursor()
+            # Thêm phim vào danh sách đã xem
             cursor.execute("""
                 INSERT INTO likes (user_id, movie_id, movie_title, poster_path)
                 VALUES (%s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE watched_at = CURRENT_TIMESTAMP, poster_path = %s
-            """, (user_id, movie_id, movie_title, poster_path, poster_path))
+                ON DUPLICATE KEY UPDATE watched_at=CURRENT_TIMESTAMP
+            """, (user_id, movie_id, movie_title, poster_path))
             
+            # Xóa phim khỏi watchlist
             cursor.execute("""
-                DELETE FROM watchlist 
+                DELETE FROM watchlist
                 WHERE user_id = %s AND movie_id = %s
             """, (user_id, movie_id))
             
             connection.commit()
             return True
         except Error as e:
-            print(f"Error adding watched movie: {e}")
+            print(f"Error adding liked movie: {e}")
             connection.rollback()
             return False
         finally:
-            if connection.is_connected():
-                cursor.close()
-                connection.close()
+            cursor.close()
+            connection.close()
+    return False
 
 # Lấy danh sách phim đã xem
 def get_like_movies(user_id):
