@@ -13,7 +13,7 @@ def create_connection():
     try:
         connection = mysql.connector.connect(
             host='localhost',
-            database='movie_app_db',
+            database='movie_film',
             user='root',
             password=''
         )
